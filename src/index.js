@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose=require('mongoose');
 const app = express();
 const joi = require('joi');
+const fs = require('fs');
 const bodyparser = require('body-parser');
 const User = require('./User');
 
@@ -26,8 +27,13 @@ app.get('/getAllUsers', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-
+	console.log("q");
+	console.log(req.query);
+	console.log("p");
+	console.log(req.params);
+	console.log("data");
 	let data = req.body;
+	console.log(data);
 	const validationResult = User.validate(data);
 	if(validationResult){
 		let userObj = new User();
@@ -37,14 +43,48 @@ app.post('/register', (req, res) => {
 		userObj.password = data.password;
 		userObj.birthday = data.birthday;
 		userObj.gender = data.gender;
-		userObj.save(function(err,reObj){
-			if(err){
-				console.log(err);
-				res.json({result:true, message: 'Opps! Couldn\'t register'});
-			}else{
-				res.json({result:true, message: 'Registered successfully'});
-			}
-		});		
+
+		console.log(req.files.image.path);
+		console.log(req.files.image.originalFilename);
+
+		if(req.files.image.path){
+			//Image Upload
+			fs.readFile(req.files.image.path,(err,data)=> {
+				const dirName = '/home/TestExercises/mobileAPIs/Images';
+				const newFilePath = dirName + req.files.image.originalFilename;
+				fs.writeFile(newFilePath, data, (err)=> {
+					if(err){ 
+						console.log(err);
+						res.json({result: false, message:'Oops! Image uplaod failed!'});
+					}
+					else
+					{
+						userObj.image = newFilePath;
+						userObj.save(function(err,reObj){
+							if(err){
+								console.log(err);
+								res.json({result:true, message: 'Opps! Couldn\'t register'});
+							}else{
+								res.json({result:true, message: 'Registered successfully'});
+							}
+						});
+						// console.log('Image uploaded...');
+						// res.json({result: true, message:'Image uploaded successfully.'});
+					}
+				});
+			});
+			//Image Upload.			
+		}
+		// userObj.save(function(err,reObj){
+		// 	if(err){
+		// 		console.log(err);
+		// 		res.json({result:true, message: 'Opps! Couldn\'t register'});
+		// 	}else{
+		// 		console.log('response');
+		// 		res.json(userObj);
+		// 		// res.json({result:true, message: 'Registered successfully'});
+		// 	}
+		// });	
 	}else{
 		res.json({result:true, message: 'Opps! Couldn\'t register'});
 	}
@@ -66,4 +106,26 @@ app.post('/login', (req, res) => {
     });
 });
 
-app.listen(8080);
+app.post('/upload',(req,res) => {
+	console.log(req.files.image.path);
+	console.log(req.files.image.originalFilename);
+
+	fs.readFile(req.files.image.path,(err,data)=> {
+		const dirName = '/home/TestExercises/mobileAPIs/Images';
+		const newFilePath = dirName + req.files.image.originalFilename;
+		fs.writeFile(newFilePath, data, (err)=> {
+			if(err){ 
+				console.log(err);
+				res.json({result: false, message:'Oops! Image uplaod failed!'});
+			}
+			else
+			{
+				console.log('Image uploaded...');
+				res.json({result: true, message:'Image uploaded successfully.'});
+			}
+		});
+	});
+
+});
+
+app.listen(8888);

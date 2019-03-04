@@ -7,7 +7,8 @@ let user=mongoose.model('users',{
 	email: 'String',
 	password: 'String',
 	birthday: 'String',
-	gender: 'String'
+	gender: 'String',
+	image: 'String'
 });
 
 user.validate = function(obj) {
@@ -17,7 +18,8 @@ user.validate = function(obj) {
 		email: joi.string().email().required(),
 	    password: joi.string().regex(/^[A-Za-z0-9]{6,20}/).required(),
 	    birthday: joi.string(),
-	    gender: joi.string()
+	    gender: joi.string(),
+	    // image: joi.string()
 	});
 
 	return joi.validate(obj, schema,(err, res) => {
